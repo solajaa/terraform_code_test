@@ -1,0 +1,43 @@
+{
+    "Version": "2012-10-17",
+    "Id": "adgear-alb-policy",
+    "Statement": [
+        {
+            "Sid": "root-access",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::234785591650:root"
+            },
+            "Action": "s3:PutObject",
+            "Resource": 
+                [ "arn:aws:s3:::${access_logs_bucket}/AWSLogs/234785591650/*",
+                  "arn:aws:s3:::javahome-alb-access-logs/*"]
+    
+             
+        },
+        {
+            "Sid": "log-delivery",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "delivery.logs.amazonaws.com"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::${access_logs_bucket}/AWSLogs/234785591650/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+            }
+        },
+        {
+            "Sid": "log-delivery-access-check",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "delivery.logs.amazonaws.com"
+            },
+            "Action": "s3:GetBucketAcl",
+            "Resource": "arn:aws:s3:::${access_logs_bucket}"
+        }
+    ]
+}
+
