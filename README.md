@@ -66,3 +66,48 @@ while read -r key last_modified; do
 done <<< "$objects"
 
 echo "Operation complete."
+
+
+
+resource "aws_iam_role" "stepfunctions_role" {
+  name = "stepfunctions_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "states.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy" "stepfunctions_policy" {
+  name        = "stepfunctions_policy"
+  description = "A policy for Step Functions to access AWS services"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "lambda:InvokeFunction",
+          "logs:*",
+          // Add other actions as needed
+        ],
+        Resource = "*",
+        Effect   = "Allow"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "stepfunctions_policy_attachment" {
+  role       = aws_iam_role.stepfunctions_role.name
+  policy_arn = aws_iam_policy.stepfunctions_policy.arn
+}
+
